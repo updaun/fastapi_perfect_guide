@@ -21,6 +21,11 @@ try:
     rows = result.fetchall()
     print(rows)
 
+    print("type rows:", type(rows[0]))
+    print(rows[0].id, rows[0].title)
+    print(rows[0][0], rows[0][1])
+    print(rows[0]._key_to_index)
+
     # CursorResult 반환.
     result.close()
 
