@@ -3,17 +3,17 @@ from sqlalchemy.pool import QueuePool, NullPool
 from sqlalchemy.exc import SQLAlchemyError
 
 # database connection URL
-DABABASE_CONN = "mysql+mysqlconnector://test:root1234@192.168.45.147:3306/blog_db"
+DATABASE_CONN = "mysql+mysqlconnector://test:root1234@192.168.45.147:3306/blog_db"
 # engine 생성
-# engine = create_engine(DABABASE_CONN)
+# engine = create_engine(DATABASE_CONN)
 # engine = create_engine(
-#     DABABASE_CONN,
+#     DATABASE_CONN,
 #     poolclass=QueuePool,
 #     pool_size=10,  # pool에 유지할 connection 수 제한
 #     max_overflow=0,  # pool에 추가로 생성할 connection 수 제한
 # )
 engine = create_engine(
-    DABABASE_CONN,
+    DATABASE_CONN,
     poolclass=NullPool,  # NullPool은 connection pool을 사용하지 않음. # 새로운 커넥션이 계속 생김
 )
 print("#### engine created")

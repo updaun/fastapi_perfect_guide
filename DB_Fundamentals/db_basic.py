@@ -3,9 +3,9 @@ from sqlalchemy.pool import QueuePool
 from sqlalchemy.exc import SQLAlchemyError
 
 # database connection URL
-DABABASE_CONN = "mysql+mysqlconnector://test:root1234@192.168.45.147:3306/blog_db"
+DATABASE_CONN = "mysql+mysqlconnector://test:root1234@192.168.45.147:3306/blog_db"
 # engine 생성
-engine = create_engine(DABABASE_CONN, poolclass=QueuePool, pool_size=10, max_overflow=0)
+engine = create_engine(DATABASE_CONN, poolclass=QueuePool, pool_size=10, max_overflow=0)
 
 try:
     # Connection 얻기
