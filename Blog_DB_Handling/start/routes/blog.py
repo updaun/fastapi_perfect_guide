@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Request, Depends, status
 from fastapi.exceptions import HTTPException
+from fastapi.templating import Jinja2Templates
 from db.database import direct_get_conn, context_get_conn
 from sqlalchemy import text, Connection
 from sqlalchemy.exc import SQLAlchemyError
@@ -8,6 +9,8 @@ from schemas.blog_schema import Blog, BlogData
 
 # router 생성
 router = APIRouter(prefix="/blogs", tags=["blogs"])
+# Jinja2 템플릿을 사용하여 HTML 파일을 렌더링하는 라우터를 추가
+templates = Jinja2Templates(directory="templates")
 
 
 @router.get("/")
@@ -32,7 +35,11 @@ async def get_all_blogs(request: Request):
             for row in result
         ]
         result.close()
-        return rows
+        return templates.TemplateResponse(
+            request, "index.html", context={
+                "all_blogs": rows
+            }
+        )
     except SQLAlchemyError as e:
         print(e)
         raise e
