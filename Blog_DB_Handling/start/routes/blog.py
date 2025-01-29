@@ -5,7 +5,7 @@ from db.database import direct_get_conn, context_get_conn
 from sqlalchemy import text, Connection
 from sqlalchemy.exc import SQLAlchemyError
 from schemas.blog_schema import Blog, BlogData
-
+from utils import util
 
 # router 생성
 router = APIRouter(prefix="/blogs", tags=["blogs"])
@@ -28,7 +28,7 @@ async def get_all_blogs(request: Request):
                 id=row.id,
                 title=row.title,
                 author=row.author,
-                content=row.content,
+                content=util.truncate_text(row.content),
                 image_loc=row.image_loc,
                 modified_dt=row.modified_dt,
             )
@@ -36,9 +36,7 @@ async def get_all_blogs(request: Request):
         ]
         result.close()
         return templates.TemplateResponse(
-            request, "index.html", context={
-                "all_blogs": rows
-            }
+            request, "index.html", context={"all_blogs": rows}
         )
     except SQLAlchemyError as e:
         print(e)
@@ -71,12 +69,14 @@ def get_blog_by_id(
             id=row[0],
             title=row[1],
             author=row[2],
-            content=row[3],
+            content=util.newline_to_br(row[3]),
             image_loc=row[4],
             modified_dt=row[5],
         )
         result.close()
-        return blog
+        return templates.TemplateResponse(
+            request, "show_blog.html", context={"blog": blog}
+        )
     except SQLAlchemyError as e:
         print(e)
         raise e
