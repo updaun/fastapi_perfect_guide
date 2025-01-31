@@ -22,5 +22,5 @@ class BlogData:
     title: str
     author: str
     content: str
-    modified_dt: datetime
+    modified_dt: datetime | None = None
     image_loc: str | None = None  # 마지막에 와야함

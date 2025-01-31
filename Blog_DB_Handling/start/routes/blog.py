@@ -109,3 +109,66 @@ def create_blog(
         print(e)
         conn.rollback()
         raise e
+
+
+@router.get("/modify/{id}")
+def modify_blog_ui(
+    request: Request, id: int, conn: Connection = Depends(context_get_conn)
+):
+    try:
+        query = """
+        select id, title, author, content from blog where id = :id
+        """
+        stmt = text(query)
+        bind_stmt = stmt.bindparams(id=id)
+        result = conn.execute(bind_stmt)
+
+        if result.rowcount == 0:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"해당 id {id}는(은) 존재하지 않습니다.",
+            )
+
+        row = result.fetchone()
+        blog = BlogData(
+            id=row[0],
+            title=row[1],
+            author=row[2],
+            content=row[3],
+        )
+        result.close()
+        return templates.TemplateResponse(
+            request, "modify_blog.html", context={"blog": blog}
+        )
+    except SQLAlchemyError as e:
+        print(e)
+        raise e
+
+
+@router.post("/modify/{id}")
+def modify_blog(
+    request: Request,
+    id: int,
+    title=Form(min_length=2, max_length=200),
+    author=Form(max_length=100),
+    content=Form(min_length=2, max_length=4000),
+    conn: Connection = Depends(context_get_conn),
+):
+    try:
+        query = """
+        UPDATE blog SET title = :title, author = :author, content = :content, modified_dt = NOW() WHERE id = :id
+        """
+        stmt = text(query)
+        bind_stmt = stmt.bindparams(title=title, author=author, content=content, id=id)
+        result = conn.execute(bind_stmt)
+        if result.rowcount == 0:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"해당 id {id}는(은) 존재하지 않습니다.",
+            )
+        conn.commit()
+        return RedirectResponse(url="/blogs", status_code=status.HTTP_302_FOUND)
+    except SQLAlchemyError as e:
+        print(e)
+        conn.rollback()
+        raise e
