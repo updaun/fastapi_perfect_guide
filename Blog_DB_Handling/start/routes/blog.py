@@ -41,7 +41,10 @@ async def get_all_blogs(request: Request):
         )
     except SQLAlchemyError as e:
         print(e)
-        raise e
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="요청하신 서비스가 잠시 내부적으로 문제가 발생하였습니다.",
+        )
     finally:
         if conn:
             conn.close()
@@ -80,7 +83,10 @@ def get_blog_by_id(
         )
     except SQLAlchemyError as e:
         print(e)
-        raise e
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="요청하신 서비스가 잠시 내부적으로 문제가 발생하였습니다.",
+        )
 
 
 @router.get("/new")
@@ -108,7 +114,10 @@ def create_blog(
     except SQLAlchemyError as e:
         print(e)
         conn.rollback()
-        raise e
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="요청데이터가 제대로 전달되지 않았습니다.",
+        )
 
 
 @router.get("/modify/{id}")
@@ -142,7 +151,10 @@ def modify_blog_ui(
         )
     except SQLAlchemyError as e:
         print(e)
-        raise e
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="요청하신 서비스가 잠시 내부적으로 문제가 발생하였습니다.",
+        )
 
 
 @router.post("/modify/{id}")
@@ -171,7 +183,10 @@ def modify_blog(
     except SQLAlchemyError as e:
         print(e)
         conn.rollback()
-        raise e
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="요청하신 서비스가 잠시 내부적으로 문제가 발생하였습니다.",
+        )
 
 
 @router.post("/delete/{id}")
@@ -195,4 +210,7 @@ def delete_blog(
     except SQLAlchemyError as e:
         print(e)
         conn.rollback()
-        raise e
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="요청하신 서비스가 잠시 내부적으로 문제가 발생하였습니다.",
+        )

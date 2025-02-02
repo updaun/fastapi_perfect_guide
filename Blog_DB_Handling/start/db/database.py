@@ -27,7 +27,10 @@ def direct_get_conn():
         return conn
     except SQLAlchemyError as e:
         print(e)
-        raise e
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="요청하신 서비스가 잠시 내부적으로 문제가 발생하였습니다.",
+        )
 
 
 def context_get_conn():
@@ -37,7 +40,10 @@ def context_get_conn():
         yield conn
     except SQLAlchemyError as e:
         print(e)
-        raise e
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="요청하신 서비스가 잠시 내부적으로 문제가 발생하였습니다.",
+        )
     finally:
         if conn:
             conn.close()
