@@ -5,9 +5,12 @@ from contextlib import contextmanager
 from fastapi import status
 from fastapi.exceptions import HTTPException
 import os
+from dotenv import load_dotenv
 
 # database connection URL
-DATABASE_CONN = "mysql+mysqlconnector://test:root1234@192.168.45.147:3306/blog_db"
+# DATABASE_CONN = "mysql+mysqlconnector://test:root1234@192.168.45.147:3306/blog_db"
+load_dotenv()
+DATABASE_CONN = os.getenv("DATABASE_CONN")
 
 
 engine = create_engine(

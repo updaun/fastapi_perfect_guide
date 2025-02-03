@@ -16,6 +16,7 @@ pydantic = {extras = ["email"], version = "^2.10.4"}
 pycountry = "^24.6.1"
 sqlalchemy = "2.0.32"
 mysql-connector-python = "9.0.0"
+python-dotenv = "^1.0.1"
 
 
 [build-system]

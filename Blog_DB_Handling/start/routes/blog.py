@@ -45,6 +45,12 @@ async def get_all_blogs(request: Request):
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail="요청하신 서비스가 잠시 내부적으로 문제가 발생하였습니다.",
         )
+    except Exception as e:
+        print(e)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="알수없는 이유로 서비스 오류가 발생했습니다.",
+        )
     finally:
         if conn:
             conn.close()
