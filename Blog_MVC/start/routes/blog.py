@@ -29,6 +29,7 @@ def get_blog_by_id(
     request: Request, id: int, conn: Connection = Depends(context_get_conn)
 ):
     blog = blog_svc.get_blog_by_id(conn, id)
+    blog.content = util.newline_to_br(blog.content)
     return templates.TemplateResponse(
         request=request, name="show_blog.html", context={"blog": blog}
     )
@@ -53,37 +54,13 @@ def create_blog(
 
 @router.get("/modify/{id}")
 def update_blog_ui(request: Request, id: int, conn=Depends(context_get_conn)):
-    try:
-        query = f"""
-        select id, title, author, content from blog where id = :id
-        """
-        stmt = text(query)
-        bind_stmt = stmt.bindparams(id=id)
-        result = conn.execute(bind_stmt)
-        # 해당 id로 데이터가 존재하지 않으면 오류를 던진다.
-        if result.rowcount == 0:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"해당 id {id}는(은) 존재하지 않습니다.",
-            )
-        row = result.fetchone()
+    blog = blog_svc.get_blog_by_id(conn, id)
 
-        return templates.TemplateResponse(
-            request=request,
-            name="modify_blog.html",
-            context={
-                "id": row.id,
-                "title": row.title,
-                "author": row.author,
-                "content": row.content,
-            },
-        )
-    except SQLAlchemyError as e:
-        print(e)
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="요청데이터가 제대로 전달되지 않았습니다.",
-        )
+    return templates.TemplateResponse(
+        request=request,
+        name="modify_blog.html",
+        context={"blog": blog},
+    )
 
 
 @router.post("/modify/{id}")
