@@ -107,68 +107,61 @@ def create_blog(
         )
 
 
-# @router.post("/modify/{id}")
-# def update_blog(
-#     request: Request,
-#     id: int,
-#     title=Form(min_length=2, max_length=200),
-#     author=Form(max_length=100),
-#     content=Form(min_length=2, max_length=4000),
-#     conn: Connection = Depends(context_get_conn),
-# ):
+def update_blog(
+    conn: Connection,
+    id: int,
+    title: str,
+    author: str,
+    content: str,
+):
 
-#     try:
-#         query = f"""
-#         UPDATE blog
-#         SET title = :title , author= :author, content= :content
-#         where id = :id
-#         """
-#         bind_stmt = text(query).bindparams(
-#             id=id, title=title, author=author, content=content
-#         )
-#         result = conn.execute(bind_stmt)
-#         # 해당 id로 데이터가 존재하지 않아 update 건수가 없으면 오류를 던진다.
-#         if result.rowcount == 0:
-#             raise HTTPException(
-#                 status_code=status.HTTP_404_NOT_FOUND,
-#                 detail=f"해당 id {id}는(은) 존재하지 않습니다.",
-#             )
-#         conn.commit()
-#         return RedirectResponse(f"/blogs/show/{id}", status_code=status.HTTP_302_FOUND)
-#     except SQLAlchemyError as e:
-#         print(e)
-#         conn.rollback()
-#         raise HTTPException(
-#             status_code=status.HTTP_400_BAD_REQUEST,
-#             detail="요청데이터가 제대로 전달되지 않았습니다. ",
-#         )
+    try:
+        query = f"""
+        UPDATE blog
+        SET title = :title , author= :author, content= :content
+        where id = :id
+        """
+        bind_stmt = text(query).bindparams(
+            id=id, title=title, author=author, content=content
+        )
+        result = conn.execute(bind_stmt)
+        # 해당 id로 데이터가 존재하지 않아 update 건수가 없으면 오류를 던진다.
+        if result.rowcount == 0:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"해당 id {id}는(은) 존재하지 않습니다.",
+            )
+        conn.commit()
+    except SQLAlchemyError as e:
+        print(e)
+        conn.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="요청데이터가 제대로 전달되지 않았습니다. ",
+        )
 
 
-# @router.post("/delete/{id}")
-# def delete_blog(
-#     request: Request, id: int, conn: Connection = Depends(context_get_conn)
-# ):
-#     try:
-#         query = f"""
-#         DELETE FROM blog
-#         where id = :id
-#         """
+def delete_blog(conn: Connection, id: int):
+    try:
+        query = f"""
+        DELETE FROM blog
+        where id = :id
+        """
 
-#         bind_stmt = text(query).bindparams(id=id)
-#         result = conn.execute(bind_stmt)
-#         # 해당 id로 데이터가 존재하지 않아 delete 건수가 없으면 오류를 던진다.
-#         if result.rowcount == 0:
-#             raise HTTPException(
-#                 status_code=status.HTTP_404_NOT_FOUND,
-#                 detail=f"해당 id {id}는(은) 존재하지 않습니다.",
-#             )
-#         conn.commit()
-#         return RedirectResponse("/blogs", status_code=status.HTTP_302_FOUND)
+        bind_stmt = text(query).bindparams(id=id)
+        result = conn.execute(bind_stmt)
+        # 해당 id로 데이터가 존재하지 않아 delete 건수가 없으면 오류를 던진다.
+        if result.rowcount == 0:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"해당 id {id}는(은) 존재하지 않습니다.",
+            )
+        conn.commit()
 
-#     except SQLAlchemyError as e:
-#         print(e)
-#         conn.rollback()
-#         raise HTTPException(
-#             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-#             detail="요청하신 서비스가 잠시 내부적으로 문제가 발생하였습니다.",
-#         )
+    except SQLAlchemyError as e:
+        print(e)
+        conn.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="요청하신 서비스가 잠시 내부적으로 문제가 발생하였습니다.",
+        )

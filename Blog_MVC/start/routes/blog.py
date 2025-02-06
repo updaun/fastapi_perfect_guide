@@ -1,11 +1,8 @@
 from fastapi import APIRouter, Request, Depends, Form, status
 from fastapi.responses import RedirectResponse
-from fastapi.exceptions import HTTPException
 from fastapi.templating import Jinja2Templates
 from db.database import direct_get_conn, context_get_conn
 from sqlalchemy import text, Connection
-from sqlalchemy.exc import SQLAlchemyError
-from schemas.blog_schema import Blog, BlogData
 from services import blog_svc
 from utils import util
 
@@ -72,59 +69,13 @@ def update_blog(
     content=Form(min_length=2, max_length=4000),
     conn: Connection = Depends(context_get_conn),
 ):
-
-    try:
-        query = f"""
-        UPDATE blog 
-        SET title = :title , author= :author, content= :content
-        where id = :id
-        """
-        bind_stmt = text(query).bindparams(
-            id=id, title=title, author=author, content=content
-        )
-        result = conn.execute(bind_stmt)
-        # 해당 id로 데이터가 존재하지 않아 update 건수가 없으면 오류를 던진다.
-        if result.rowcount == 0:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"해당 id {id}는(은) 존재하지 않습니다.",
-            )
-        conn.commit()
-        return RedirectResponse(f"/blogs/show/{id}", status_code=status.HTTP_302_FOUND)
-    except SQLAlchemyError as e:
-        print(e)
-        conn.rollback()
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="요청데이터가 제대로 전달되지 않았습니다. ",
-        )
+    blog_svc.update_blog(conn, id, title, author, content)
+    return RedirectResponse(f"/blogs/show/{id}", status_code=status.HTTP_302_FOUND)
 
 
 @router.post("/delete/{id}")
 def delete_blog(
     request: Request, id: int, conn: Connection = Depends(context_get_conn)
 ):
-    try:
-        query = f"""
-        DELETE FROM blog
-        where id = :id
-        """
-
-        bind_stmt = text(query).bindparams(id=id)
-        result = conn.execute(bind_stmt)
-        # 해당 id로 데이터가 존재하지 않아 delete 건수가 없으면 오류를 던진다.
-        if result.rowcount == 0:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"해당 id {id}는(은) 존재하지 않습니다.",
-            )
-        conn.commit()
-        return RedirectResponse("/blogs", status_code=status.HTTP_302_FOUND)
-
-    except SQLAlchemyError as e:
-        print(e)
-        conn.rollback()
-        raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="요청하신 서비스가 잠시 내부적으로 문제가 발생하였습니다.",
-        )
+    blog_svc.delete_blog(conn, id)
+    return RedirectResponse("/blogs", status_code=status.HTTP_302_FOUND)
