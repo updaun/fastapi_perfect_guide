@@ -13,15 +13,21 @@ class Item(BaseModel):
     name: str
     description: str
 
+
 @app.get("/all_items", response_class=HTMLResponse)
 async def read_all_items(request: Request):
-    all_items = [Item(name="테스트_상품명_" +str(i), 
-                      description="테스트 내용입니다. 인덱스는 " + str(i)) for i in range(5) ]
+    all_items = [
+        Item(
+            name="테스트_상품명_" + str(i),
+            description="테스트 내용입니다. 인덱스는 " + str(i),
+        )
+        for i in range(5)
+    ]
     print("all_items:", all_items)
     return templates.TemplateResponse(
-        request=request, 
-        name="index_no_include.html",
-        #name="index_include.html",
-        #name="index.html", 
-        context={"all_items": all_items}
+        request=request,
+        # name="index_no_include.html",
+        name="index_include.html",
+        # name="index.html",
+        context={"all_items": all_items},
     )
