@@ -27,7 +27,7 @@ async def read_all_items(request: Request):
     return templates.TemplateResponse(
         request=request,
         # name="index_no_include.html",
-        name="index_include.html",
-        # name="index.html",
+        # name="index_include.html",
+        name="index.html",
         context={"all_items": all_items},
     )
