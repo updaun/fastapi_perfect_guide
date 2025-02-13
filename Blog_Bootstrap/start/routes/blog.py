@@ -48,8 +48,16 @@ def create_blog(
     imagefile: UploadFile | None = File(None),
     conn: Connection = Depends(context_get_conn),
 ):
-    blog_svc.upload_file(author=author, imagefile=imagefile)
-    blog_svc.create_blog(conn, title=title, author=author, content=content)
+    image_loc = None
+    if len(imagefile.filename.strip()) > 0:
+        image_loc = blog_svc.upload_file(author=author, imagefile=imagefile)
+    blog_svc.create_blog(
+        conn,
+        title=title,
+        author=author,
+        content=content,
+        image_loc=image_loc,
+    )
 
     return RedirectResponse("/blogs", status_code=status.HTTP_302_FOUND)
 
