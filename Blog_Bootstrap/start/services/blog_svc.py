@@ -137,16 +137,22 @@ def create_blog(
         )
 
 
-def update_blog(conn: Connection, id: int, title: str, author: str, content: str):
+def update_blog(
+    conn: Connection, id: int, title: str, author: str, content: str, image_loc=None
+):
 
     try:
         query = f"""
         UPDATE blog 
-        SET title = :title , author= :author, content= :content
+        SET title = :title, author = :author, content = :content, image_loc = :image_loc
         where id = :id
         """
         bind_stmt = text(query).bindparams(
-            id=id, title=title, author=author, content=content
+            id=id,
+            title=title,
+            author=author,
+            content=content,
+            image_loc=image_loc,
         )
         result = conn.execute(bind_stmt)
         # 해당 id로 데이터가 존재하지 않아 update 건수가 없으면 오류를 던진다.

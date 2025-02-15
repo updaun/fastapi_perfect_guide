@@ -78,10 +78,20 @@ def update_blog(
     title=Form(min_length=2, max_length=200),
     author=Form(max_length=100),
     content=Form(min_length=2, max_length=4000),
+    imagefile: UploadFile | None = File(None),
     conn: Connection = Depends(context_get_conn),
 ):
-
-    blog_svc.update_blog(conn=conn, id=id, title=title, author=author, content=content)
+    image_loc = None
+    if len(imagefile.filename.strip()) > 0:
+        image_loc = blog_svc.upload_file(author=author, imagefile=imagefile)
+    blog_svc.update_blog(
+        conn=conn,
+        id=id,
+        title=title,
+        author=author,
+        content=content,
+        image_loc=image_loc,
+    )
     return RedirectResponse(f"/blogs/show/{id}", status_code=status.HTTP_302_FOUND)
 
 
