@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Request, Depends, Form, status, File, UploadFile
-from fastapi.responses import RedirectResponse
+from fastapi.responses import RedirectResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
 from db.database import context_get_conn
 from sqlalchemy import Connection
@@ -95,10 +95,13 @@ def update_blog(
     return RedirectResponse(f"/blogs/show/{id}", status_code=status.HTTP_302_FOUND)
 
 
-@router.post("/delete/{id}")
+@router.delete("/delete/{id}")
 def delete_blog(
     request: Request, id: int, conn: Connection = Depends(context_get_conn)
 ):
-
-    blog_svc.delete_blog(conn=conn, id=id)
+    blog = blog_svc.get_blog_by_id(conn, id=id)
+    blog_svc.delete_blog(conn=conn, id=id, image_loc=blog.image_loc)
+    return JSONResponse(
+        content="블로그가 삭제되었습니다.", status_code=status.HTTP_200_OK
+    )
     # return RedirectResponse("/blogs", status_code=status.HTTP_302_FOUND)

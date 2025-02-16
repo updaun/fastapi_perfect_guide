@@ -172,7 +172,7 @@ def update_blog(
         )
 
 
-def delete_blog(conn: Connection, id: int):
+def delete_blog(conn: Connection, id: int, image_loc: str = None):
     try:
         query = f"""
         DELETE FROM blog
@@ -189,10 +189,23 @@ def delete_blog(conn: Connection, id: int):
             )
         conn.commit()
 
+        if image_loc is not None:
+            image_path = "." + image_loc
+            if os.path.exists(image_path):
+                print("image_path: ", image_path)
+                os.remove(image_path)
+
     except SQLAlchemyError as e:
         print(e)
         conn.rollback()
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail="요청하신 서비스가 잠시 내부적으로 문제가 발생하였습니다.",
+        )
+    except Exception as e:
+        print(e)
+        conn.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="알수없는 이유로 서비스 오류가 발생하였습니다",
         )
