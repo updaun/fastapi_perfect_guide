@@ -32,10 +32,10 @@ async def direct_get_conn():
         )
 
 
-def context_get_conn():
+async def context_get_conn():
     conn = None
     try:
-        conn = engine.connect()
+        conn = await engine.connect()
         yield conn
     except SQLAlchemyError as e:
         print(e)
@@ -45,4 +45,4 @@ def context_get_conn():
         )
     finally:
         if conn:
-            conn.close()
+            await conn.close()
