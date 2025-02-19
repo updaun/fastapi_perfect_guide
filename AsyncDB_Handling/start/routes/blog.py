@@ -56,7 +56,7 @@ async def create_blog(
     image_loc = None
     if len(imagefile.filename.strip()) > 0:
         # 반드시 transactional 한 처리를 위해 upload_file()이 먼저 수행되어야 함.
-        image_loc = blog_svc.upload_file(author=author, imagefile=imagefile)
+        image_loc = await blog_svc.upload_file(author=author, imagefile=imagefile)
         await blog_svc.create_blog(
             conn, title=title, author=author, content=content, image_loc=image_loc
         )
@@ -89,7 +89,7 @@ async def update_blog(
 ):
     image_loc = None
     if len(imagefile.filename.strip()) > 0:
-        image_loc = blog_svc.upload_file(author=author, imagefile=imagefile)
+        image_loc = await blog_svc.upload_file(author=author, imagefile=imagefile)
         await blog_svc.update_blog(
             conn=conn,
             id=id,

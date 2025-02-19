@@ -8,6 +8,7 @@ from typing import List
 from dotenv import load_dotenv
 import os
 import time
+import aiofiles as aio
 
 load_dotenv()
 UPLOAD_DIR = os.getenv("UPLOAD_DIR")
@@ -95,7 +96,7 @@ async def get_blog_by_id(conn: Connection, id: int):
         )
 
 
-def upload_file(author: str, imagefile: UploadFile = None):
+async def upload_file(author: str, imagefile: UploadFile = None):
     try:
         user_dir = f"{UPLOAD_DIR}/{author}/"
         if not os.path.exists(user_dir):
@@ -105,9 +106,9 @@ def upload_file(author: str, imagefile: UploadFile = None):
         upload_filename = f"{filename_only}_{(int)(time.time())}{ext}"
         upload_image_loc = user_dir + upload_filename
 
-        with open(upload_image_loc, "wb") as outfile:
-            while content := imagefile.file.read(1024):
-                outfile.write(content)
+        async with aio.open(upload_image_loc, "wb") as outfile:
+            while content := await imagefile.read(1024):
+                await outfile.write(content)
         print("upload succeeded:", upload_image_loc)
 
         return upload_image_loc[1:]
