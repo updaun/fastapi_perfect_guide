@@ -8,7 +8,6 @@ from sqlalchemy.exc import SQLAlchemyError
 from schemas.blog_schema import Blog, BlogData
 from services import blog_svc
 from utils import util
-from main import templates
 
 
 # router 생성
@@ -16,7 +15,9 @@ router = APIRouter(prefix="/blogs", tags=["blogs"])
 
 
 # jinja2 Template 엔진 생성
-# templates = Jinja2Templates(directory="templates")
+templates = Jinja2Templates(directory="templates")
+
+
 @router.get("/")
 async def get_all_blogs(request: Request, conn: Connection = Depends(context_get_conn)):
     all_blogs = await blog_svc.get_all_blogs(conn)

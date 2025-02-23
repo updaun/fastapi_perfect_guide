@@ -1,10 +1,12 @@
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, HTTPException, Request, status
 from fastapi.staticfiles import StaticFiles
+from fastapi.exceptions import RequestValidationError
 
 from contextlib import asynccontextmanager
 from db.database import engine
 from fastapi.responses import JSONResponse
 from fastapi.templating import Jinja2Templates
+from routes import blog
 
 
 @asynccontextmanager
@@ -23,8 +25,6 @@ app = FastAPI(lifespan=lifespan)
 templates = Jinja2Templates(directory="templates")
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
-
-from routes import blog
 
 app.include_router(blog.router)
 
@@ -47,4 +47,19 @@ async def custom_http_exception_handler(request: Request, exc: HTTPException):
             "title_message": "불편을 드려 죄송합니다",
             "detail": exc.detail,
         },
+        status_code=exc.status_code,
+    )
+
+
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    return templates.TemplateResponse(
+        request=request,
+        name="validation_error.html",
+        context={
+            "status_code": status.HTTP_422_UNPROCESSABLE_ENTITY,
+            "title_message": "잘못된 값을 입력하셨습니다.",
+            "detail": exc.errors(),
+        },
+        status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
     )
