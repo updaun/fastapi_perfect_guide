@@ -20,6 +20,7 @@ python-dotenv = "^1.0.1"
 pymysql = "1.1.1"
 aiomysql = "0.2.0"
 aiofiles = "24.1.0"
+cryptography = "^44.0.1"
 
 
 [build-system]
