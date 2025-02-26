@@ -9,3 +9,24 @@ class DummyMiddleware(BaseHTTPMiddleware):
 
         response = await call_next(request)
         return response
+
+
+class MethodOverrideMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        print(
+            "#### request url, query params, method:",
+            request.url,
+            request.query_params,
+            request.method,
+        )
+        if request.method == "POST":
+            query = request.query_params
+            if query:
+                method_override = query.get("_method")
+                if method_override:
+                    method_override = method_override.upper()
+                    if method_override in ("PUT", "DELETE"):
+                        request.scope["method"] = method_override
+
+        response = await call_next(request)
+        return response

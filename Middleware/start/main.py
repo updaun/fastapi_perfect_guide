@@ -12,6 +12,7 @@ app = FastAPI(lifespan=lifespan)
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 app.add_middleware(middleware.DummyMiddleware)
+app.add_middleware(middleware.MethodOverrideMiddleware)
 
 app.include_router(blog.router)
 
