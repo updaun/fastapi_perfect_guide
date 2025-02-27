@@ -122,3 +122,13 @@ async def delete_blog(
         content="메시지가 삭제되었습니다", status_code=status.HTTP_200_OK
     )
     # return RedirectResponse("/blogs", status_code=status.HTTP_302_FOUND)
+
+
+@router.get("/show_json/{id}")
+async def get_blog_by_id(
+    request: Request, id: int, conn: Connection = Depends(context_get_conn)
+):
+    blog = await blog_svc.get_blog_by_id(conn, id)
+    blog.content = util.newline_to_br(blog.content)
+
+    return blog
