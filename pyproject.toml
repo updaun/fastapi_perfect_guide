@@ -23,6 +23,7 @@ aiofiles = "24.1.0"
 cryptography = "^44.0.1"
 bcrypt = "4.0.1"
 passlib = {version = "1.7.4", extras = ["bcrypt"]}
+itsdangerous = "2.2.0"
 
 
 [build-system]
