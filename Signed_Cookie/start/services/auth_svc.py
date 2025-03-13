@@ -104,7 +104,16 @@ def get_session(request: Request):
     return request.session
 
 
-def get_session_user(request: Request):
+def get_session_user_opt(request: Request):
     if "session_user" in request.session.keys():
         return request.session["session_user"]
     return None
+
+
+def get_session_user_prt(request: Request):
+    if "session_user" not in request.session.keys():
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="해당 서비스는 로그인이 필요합니다.",
+        )
+    return request.session["session_user"]
