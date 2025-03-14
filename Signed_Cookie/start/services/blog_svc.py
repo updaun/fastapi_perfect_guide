@@ -23,6 +23,7 @@ async def get_all_blogs(conn: Connection) -> List:
         , modified_dt 
         FROM blog a
           join user b on a.author_id = b.id
+        order by modified_dt desc;
         """
         result = await conn.execute(text(query))
         all_blogs = [
@@ -130,12 +131,12 @@ async def upload_file(author: str, imagefile: UploadFile = None):
 
 
 async def create_blog(
-    conn: Connection, title: str, author: str, content: str, image_loc=None
+    conn: Connection, title: str, author_id: int, content: str, image_loc=None
 ):
     try:
         query = f"""
-        INSERT INTO blog(title, author, content, image_loc, modified_dt)
-        values ('{title}', '{author}', '{content}', {util.none_to_null(image_loc, is_squote=True)} , now())
+        INSERT INTO blog(title, author_id, content, image_loc, modified_dt)
+        values ('{title}', {author_id}, '{content}', {util.none_to_null(image_loc, is_squote=True)} , now())
         """
 
         await conn.execute(text(query))
@@ -154,7 +155,6 @@ async def update_blog(
     conn: Connection,
     id: int,
     title: str,
-    author: str,
     content: str,
     image_loc: str = None,
 ):
@@ -162,12 +162,12 @@ async def update_blog(
     try:
         query = f"""
         UPDATE blog 
-        SET title = :title , author= :author, content= :content
+        SET title = :title , content= :content
         , image_loc = :image_loc
         where id = :id
         """
         bind_stmt = text(query).bindparams(
-            id=id, title=title, author=author, content=content, image_loc=image_loc
+            id=id, title=title, content=content, image_loc=image_loc
         )
         result = await conn.execute(bind_stmt)
         # 해당 id로 데이터가 존재하지 않아 update 건수가 없으면 오류를 던진다.

@@ -66,7 +66,6 @@ async def create_blog_ui(
 async def create_blog(
     request: Request,
     title=Form(min_length=2, max_length=200),
-    author=Form(max_length=100),
     content=Form(min_length=2, max_length=4000),
     imagefile: UploadFile | None = File(None),
     conn: Connection = Depends(context_get_conn),
@@ -75,15 +74,17 @@ async def create_blog(
     # print("##### imagefile:", imagefile)
     # print("#### filename:", imagefile.filename)
     image_loc = None
+    author = session_user["name"]
+    author_id = session_user["id"]
     if len(imagefile.filename.strip()) > 0:
         # 반드시 transactional 한 처리를 위해 upload_file()이 먼저 수행되어야 함.
         image_loc = await blog_svc.upload_file(author=author, imagefile=imagefile)
         await blog_svc.create_blog(
-            conn, title=title, author=author, content=content, image_loc=image_loc
+            conn, title=title, author_id=author_id, content=content, image_loc=image_loc
         )
     else:
         await blog_svc.create_blog(
-            conn, title=title, author=author, content=content, image_loc=image_loc
+            conn, title=title, author_id=author_id, content=content, image_loc=image_loc
         )
 
     return RedirectResponse("/blogs", status_code=status.HTTP_302_FOUND)
@@ -110,20 +111,20 @@ async def update_blog(
     request: Request,
     id: int,
     title=Form(min_length=2, max_length=200),
-    author=Form(max_length=100),
     content=Form(min_length=2, max_length=4000),
     imagefile: UploadFile | None = File(None),
     conn: Connection = Depends(context_get_conn),
     session_user=Depends(auth_svc.get_session_user_prt),
 ):
     image_loc = None
+    author = session_user["name"]
+    author_id = session_user["id"]
     if len(imagefile.filename.strip()) > 0:
         image_loc = await blog_svc.upload_file(author=author, imagefile=imagefile)
         await blog_svc.update_blog(
             conn=conn,
             id=id,
             title=title,
-            author=author,
             content=content,
             image_loc=image_loc,
         )
@@ -132,7 +133,6 @@ async def update_blog(
             conn=conn,
             id=id,
             title=title,
-            author=author,
             content=content,
             image_loc=image_loc,
         )
