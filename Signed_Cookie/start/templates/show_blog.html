@@ -13,8 +13,10 @@
 
                 <!-- Action Buttons -->
                 <a href="/blogs" class="btn btn-secondary">홈으로 돌아가기</a>
+                {% if is_valid_auth %}
                 <a href="/blogs/modify/{{ blog.id }}" class="btn btn-primary">블로그 수정</a>
                 <button class="btn btn-danger" onclick="confirmDelete()">블로그 삭제</button>
+                {% endif %}
             </div>
         </div>
     </div>
@@ -46,7 +48,7 @@
                     }
                } catch (error) {
                     console.error('Error during the fetch operation:', error);
-                    alert('An error occurred. Please try again.');
+                    alert('해당 서비스는 권한이 없습니다.');
                 }
             }
         }

@@ -40,6 +40,8 @@ async def get_blog_by_id(
     session_user=Depends(auth_svc.get_session_user_opt),
 ):
     blog = await blog_svc.get_blog_by_id(conn, id)
+    is_valid_auth = auth_svc.check_valid_auth(session_user, blog.author_id, blog.email)
+
     blog.content = util.newline_to_br(blog.content)
 
     return templates.TemplateResponse(
@@ -48,6 +50,7 @@ async def get_blog_by_id(
         context={
             "blog": blog,
             "session_user": session_user,
+            "is_valid_auth": is_valid_auth,
         },
     )
 
@@ -98,6 +101,13 @@ async def update_blog_ui(
     session_user=Depends(auth_svc.get_session_user_prt),
 ):
     blog = await blog_svc.get_blog_by_id(conn, id=id)
+    is_valid_auth = auth_svc.check_valid_auth(session_user, blog.author_id, blog.email)
+
+    if not is_valid_auth:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="해당 블로그를 수정할 권한이 없습니다.",
+        )
 
     return templates.TemplateResponse(
         request=request,
@@ -116,9 +126,17 @@ async def update_blog(
     conn: Connection = Depends(context_get_conn),
     session_user=Depends(auth_svc.get_session_user_prt),
 ):
+    blog = await blog_svc.get_blog_by_id(conn, id=id)
+    is_valid_auth = auth_svc.check_valid_auth(session_user, blog.author_id, blog.email)
+
+    if not is_valid_auth:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="해당 블로그를 수정할 권한이 없습니다.",
+        )
+
     image_loc = None
     author = session_user["name"]
-    author_id = session_user["id"]
     if len(imagefile.filename.strip()) > 0:
         image_loc = await blog_svc.upload_file(author=author, imagefile=imagefile)
         await blog_svc.update_blog(
@@ -148,6 +166,14 @@ async def delete_blog(
     session_user=Depends(auth_svc.get_session_user_prt),
 ):
     blog = await blog_svc.get_blog_by_id(conn=conn, id=id)
+    is_valid_auth = auth_svc.check_valid_auth(session_user, blog.author_id, blog.email)
+
+    if not is_valid_auth:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="해당 블로그를 삭제할 권한이 없습니다.",
+        )
+
     await blog_svc.delete_blog(conn=conn, id=id, image_loc=blog.image_loc)
     return JSONResponse(
         content="메시지가 삭제되었습니다", status_code=status.HTTP_200_OK
